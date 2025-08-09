@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6c5ce7">
+    <title>MoneyMind | AI-Powered Finance Tracker</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container" id="appContainer">
+        <aside class="sidebar" id="sidebar">
+            <div class="branding"><i class="fas fa-wallet"></i><h2>MoneyMind</h2></div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#" class="nav-link active" data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li><a href="#" class="nav-link" data-section="accounts"><i class="fas fa-university"></i> Accounts</a></li>
+                    <li><a href="#" class="nav-link" data-section="calendar"><i class="fas fa-calendar-alt"></i> Calendar</a></li>
+                    <li><a href="#" class="nav-link" data-section="goals"><i class="fas fa-bullseye"></i> Goals</a></li>
+                    <li><a href="#" class="nav-link" data-section="reports"><i class="fas fa-chart-bar"></i> Reports</a></li>
+                    <li><a href="#" class="nav-link" data-section="settings"><i class="fas fa-cog"></i> Settings</a></li>
+                </ul>
+            </nav>
+            <div class="user-section">
+                <div class="user-avatar" id="userAvatar"></div>
+                <div class="user-info">
+                    <span class="user-name" id="userName"></span>
+                    <span class="user-email" id="userEmail"></span>
+                </div>
+                <button class="logout-btn" id="logoutBtn" aria-label="Logout" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </aside>
+
+        <main class="main-content" id="main-content">
+            <section class="content-section active" id="dashboard-section">
+                <header class="page-header">
+                    <h2>Dashboard</h2>
+                    <div class="page-actions">
+                        <button class="btn btn-secondary" id="exportDataBtn"><i class="fas fa-download"></i> Export Data</button>
+                        <button class="btn btn-primary" id="addTransactionBtn"><i class="fas fa-plus"></i> Add Transaction</button>
+                    </div>
+                </header>
+                <div class="balance-card" style="margin-top: 1.5rem;">
+                    <h4>TOTAL BALANCE</h4>
+                    <div class="amount" id="totalBalance">₹0.00</div>
+                    <div class="monthly-change" id="monthlyChange">--</div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card"><h5>Monthly Income</h5><div class="amount" id="monthlyIncomeStat">₹0.00</div></div>
+                    <div class="stat-card"><h5>Monthly Expenses</h5><div class="amount" id="monthlyExpensesStat">₹0.00</div></div>
+                    <div class="stat-card"><h5>Savings Rate</h5><div class="amount" id="savingsRateStat">0%</div></div>
+                    <div class="stat-card">
+                        <h5>Spending Method (Month)</h5>
+                        <div id="spendingMethodStat" style="margin-top: 0.5rem;"></div>
+                    </div>
+                </div>
+                <div class="section-heading">
+                    <h3>Budget Categories</h3>
+                    <div class="search-add-wrapper">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="search" id="categorySearchInput" placeholder="Search categories...">
+                        </div>
+                        <button class="btn add-btn" id="addCategoryBtn" aria-label="Add Category" title="Add Category"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div class="categories-grid" id="categoriesGrid"></div>
+            </section>
+            
+            <section class="content-section" id="accounts-section">
+                <header class="page-header"><h2>Accounts</h2>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" id="addAccountBtn"><i class="fas fa-plus"></i> Add Account</button>
+                    </div>
+                </header>
+                <div class="accounts-grid" id="accountsGrid" style="margin-top: 1.5rem;"></div>
+                <div class="section-heading"><h3>Recent Transactions</h3></div>
+                <div class="stat-card" style="padding: var(--spacing-sm); overflow-x: auto;">
+                    <table class="transactions-table" id="recentTransactionsTable">
+                        <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Account</th><th>Method</th><th>Amount</th></tr></thead>
+                        <tbody><tr><td colspan="6" style="text-align: center; opacity: 0.7;">No transactions yet.</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <section class="content-section" id="calendar-section">
+                <header class="page-header"><h2>Calendar</h2></header>
+                <div id="calendar-container" style="margin-top: 1.5rem;"></div>
+            </section>
+
+            <section class="content-section" id="goals-section">
+                <header class="page-header"><h2>Financial Goals</h2>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" id="addGoalBtn"><i class="fas fa-plus"></i> Add Goal</button>
+                    </div>
+                </header>
+                <div class="categories-grid" id="goalsGrid" style="margin-top: 1.5rem;"></div>
+            </section>
+            
+            <section class="content-section" id="reports-section">
+                <header class="page-header">
+                    <div>
+                        <h2>AI Financial Reports</h2>
+                        <p style="opacity: 0.8; font-size: 1rem; max-width: 80ch; margin-top: 0.5rem;">Generate a smart summary and get personalized insights on your financial activity using AI.</p>
+                    </div>
+                </header>
+                <div class="page-actions" style="margin-top: 1.5rem;">
+                    <button class="btn btn-primary" id="getAiInsightsBtn">
+                        <i class="fas fa-lightbulb"></i> ✨ Generate AI Summary
+                    </button>
+                </div>
+                <div id="aiInsightsContainer">
+                    <h3 style="margin-bottom: 1rem;">Your AI Financial Summary</h3>
+                    <div id="aiInsightsContent"></div>
+                </div>
+            </section>
+
+            <section class="content-section" id="settings-section">
+                <header class="page-header"><h2>Settings</h2></header>
+                <div class="stat-card">
+                    <h4 style="margin-bottom: 1.5rem; font-size: 1.2rem;">App Settings</h4>
+                    <div class="form-group">
+                        <label for="currencySelector">Default Currency</label>
+                        <select id="currencySelector">
+                            <option value="INR">Indian Rupee (₹)</option>
+                            <option value="USD">US Dollar ($)</option>
+                            <option value="EUR">Euro (€)</option>
+                            <option value="GBP">British Pound (£)</option>
+                            <option value="JPY">Japanese Yen (¥)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="defaultAccountSelector">Default Account for New Transactions</label>
+                        <select id="defaultAccountSelector"></select>
+                    </div>
+                </div>
+                <div class="danger-zone">
+                    <h4 style="color: var(--danger); font-size: 1.2rem;">Danger Zone</h4>
+                    <p style="opacity: 0.8; margin: 0.5rem 0 1.5rem 0;">This action is irreversible and will permanently delete all your financial data.</p>
+                    <button id="resetDataBtn" class="btn btn-danger">Reset All Data</button>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h3>Welcome to MoneyMind</h3>
+
+            <div id="g_id_onload" data-client_id="1042660963644-a2r4gm85h5kt7fmq61qdkndsuhj5j8ou.apps.googleusercontent.com" data-callback="App.Auth.handleGoogleSignIn" data-auto_select="true"></div>
+            <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left" style="display: flex; justify-content: center;"></div>
+            
+            <p style="text-align:center; margin: 1rem 0; opacity: 0.7;">or</p>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email <span class="required">*</span></label>
+                    <input type="email" id="email" value="demo@moneymind.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password <span class="required">*</span></label>
+                    <input type="password" id="password" value="Demo123!" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+                <p class="switch-form">No account? <button type="button" id="showRegisterBtn" class="link-button">Create one</button></p>
+            </form>
+
+            <form id="registerForm" class="hidden">
+                <div class="form-group">
+                    <label for="regName">Full Name <span class="required">*</span></label>
+                    <input type="text" id="regName" required autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Email <span class="required">*</span></label>
+                    <input type="email" id="regEmail" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Password <span class="required">*</span></label>
+                    <input type="password" id="regPassword" placeholder="Min 8 chars, 1 uppercase, 1 number" required autocomplete="new-password">
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
+                    <input type="checkbox" id="isStudentCheck" style="width: auto; height: auto; margin:0;">
+                    <label for="isStudentCheck" style="margin-bottom: 0; font-weight: normal;">I am a student</label>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+                <p class="switch-form">Have an account? <button type="button" id="showLoginBtn" class="link-button">Sign In</button></p>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="formModal"><div class="modal-content" id="formModalContent"></div></div>
+
+    <div class="modal" id="exportModal"><div class="modal-content">
+        <button class="close-modal" title="Close">&times;</button>
+        <h3>Export Data</h3>
+        <p style="text-align: center; margin-bottom: 1.5rem;">Choose your desired export format.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button id="modalGeneratePdfBtn" class="btn btn-primary"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button id="modalExportCsvBtn" class="btn btn-secondary"><i class="fas fa-file-csv"></i> CSV</button>
+        </div>
+    </div></div>
+
+    <div class="modal" id="confirmModal"><div class="modal-content">
+       <button class="close-modal" title="Close">&times;</button>
+       <h3 id="confirmModalTitle">Are you sure?</h3>
+       <p id="confirmModalText" style="margin: 1.5rem 0; text-align: center;"></p>
+       <div style="display: flex; gap: 1rem; justify-content: center;">
+           <button id="confirmModalCancel" class="btn btn-secondary">Cancel</button>
+           <button id="confirmModalConfirm" class="btn btn-danger">Confirm</button>
+       </div>
+    </div></div>
+    
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="script.js" defer></script>
+</body>
+</html>
